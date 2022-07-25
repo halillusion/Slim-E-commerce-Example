@@ -411,7 +411,7 @@ class OrderController {
 			$orderModel = new OrderModel;
 			$getCart = $orderModel->where('user_id', $userData->id)->where('status', 'cart')->get();
 
-			if (isset($getCart->id) !== false) {
+			if (isset($getCart->id) !== false AND count(json_decode($getCart->items, true))) {
 
 				if ($orderModel->where('id', $getCart->id)->update(['status' => 'completed'])) {
 					$return['status'] = true;
