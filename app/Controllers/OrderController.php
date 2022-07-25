@@ -236,7 +236,6 @@ class OrderController {
 
 			} else {
 
-				$return['status'] = true;
 				$return['message'] = 'Sepetiniz boş!';
 
 			}
@@ -268,34 +267,122 @@ class OrderController {
 			if (isset($getCart->id) !== false AND count(json_decode($getCart->items, true))) {
 
 				$getCart->items = json_decode($getCart->items);
+				$productModel = new ProductModel;
 				$categoryModel = new CategoryModel;
 				$getCategories = $categoryModel->select('id, discount_rules')->getAll();
+
+				// extract campaigns
 				$campaigns = [];
 				foreach ($getCategories as $category) {
-					$campaigns[] = 
+					$category->discount_rules = strpos($category->discount_rules, ',') !== false ? explode(',', $category->discount_rules) : [$category->discount_rules];
+					foreach ($category->discount_rules as $rule) {
+						if ($rule !== '') {
+							$campaigns[] = [$rule, $category->id];
+						}
+					}
 				}
-				/*
-				switch (variable) {
-					case 'value':
-						// code...
-						break;
+
+				// get product data
+				$products = [];
+				foreach ($getCart->items as $cartProductId => $cartProductDetail) {
 					
-					default:
-						// code...
-						break;
+					$cartProduct = $productModel->where('id', $cartProductId)->get();
+					if (isset($cartProduct->id) !== false) {
+						$products[$cartProduct->id] = $cartProduct;
+					}
 				}
-				*/
+
+				// system campaigns
+				$campaigns[] = ['10_PERCENT_OVER_1000', 0];
+
+				$discounts = [];
+				$discountedTotal = $getCart->total;
+				if (count($campaigns)) {
+
+					foreach ($campaigns as $campaign) {
+						
+						// not programmatic because I don't have time for that yet.
+						switch ($campaign[0]) {
+							case 'BUY_2_PLUS_PERCENT_20_LOWEST':
+
+								$categoryTrap = [];
+								foreach ($getCart->items as $item) {
+									if (
+										isset($products[$item->productId]->category_id) !== false AND 
+										$products[$item->productId]->category_id === $campaign[1] AND 
+										$item->quantity >= 2
+									) {
+										$item->categoryId = $campaign[1];
+										$categoryTrap[] = $item;
+									}
+								}
+
+								if (count($categoryTrap)) {
+
+									usort($categoryTrap, function($a, $b) {
+										return (float)$a->unitPrice <=> (float)$b->unitPrice;
+									});
+										
+									$calcDiscount = (($categoryTrap[0]->unitPrice / 100) * 20);
+									$discountedTotal -= $calcDiscount;
+									$discounts[] = [
+										'discountReason' => $campaign[0],
+										'discountAmount' => number_format($calcDiscount, 2),
+										'subtotal' => number_format($discountedTotal, 2)
+									];
+
+								}
+								break;
+
+							case 'BUY_5_GET_1':
+								foreach ($getCart->items as $item) {
+									if (
+										isset($products[$item->productId]->category_id) !== false AND 
+										$products[$item->productId]->category_id === $campaign[1] AND
+										$item->quantity > 5
+									) {
+
+										$freeProduct = floor($item->quantity / 5);
+										
+										$calcDiscount = $freeProduct * $item->unitPrice;
+										$discountedTotal -= $calcDiscount;
+										$discounts[] = [
+											'discountReason' => $campaign[0],
+											'discountAmount' => number_format($calcDiscount, 2),
+											'subtotal' => number_format($discountedTotal, 2)
+										];
+									}
+								}
+								break;
+
+							case '10_PERCENT_OVER_1000':
+								if ($campaign[1] === 0 AND $discountedTotal > 1000) {
+
+									$calcDiscount = (($discountedTotal / 100) * 10);
+									$discountedTotal -= $calcDiscount;
+									$discounts[] = [
+										'discountReason' => $campaign[0],
+										'discountAmount' => number_format($calcDiscount, 2),
+										'subtotal' => number_format($discountedTotal, 2)
+									];
+
+								}
+								break;
+						}
+
+					}
+
+				}
 
 				$return['status'] = true;
 				$return['message'] = 'İndirimli sepet listelendi.';
-				$return['discounts'] = json_decode($discounts);
+				$return['discounts'] = $discounts;
 				$return['items'] = $getCart->items;
 				$return['total'] = $getCart->total;
 				$return['discounted_total'] = $discountedTotal;
 
 			} else {
 
-				$return['status'] = true;
 				$return['message'] = 'Sepetiniz boş!';
 
 			}

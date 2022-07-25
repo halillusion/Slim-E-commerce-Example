@@ -238,7 +238,7 @@ return [
 		'categories' => [
 			[
 				'name'                	=> 'A Kategorisi',
-				'discount_rules'        => 'BUY_2_PLUS_10_PERCENT_20_LOWEST',
+				'discount_rules'        => 'BUY_2_PLUS_PERCENT_20_LOWEST',
 				'created_at'            => time(),
 				'created_by'            => 0
 			],
