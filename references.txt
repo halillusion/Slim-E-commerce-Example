@@ -1,0 +1,3 @@
+- https://www.slimframework.com/docs/v4/
+- https://github.com/KalipsoCollective/KalipsoNext
+- https://github.com/izniburak/pdox

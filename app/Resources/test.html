@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>API Test Interface</title>
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet">
+	</head>
+	<style>
+		.code-area {
+			min-height: 75vh;
+			width: 100%;
+			background: #222;
+			border-radius: 0.5rem;
+			color:  #ccc;
+			padding: 1rem;
+		}
+
+		.result-btn {
+			pointer-events: none;
+		}
+	</style>
+	<body>
+		<div class="container-fluid">
+			<div class="row g-2">
+				<div class="col-12">
+					<h1 class="text-center mt-3">API Test Arayüzü</h1>
+					<p class="lead text-center mb-5">Bu arayüz aracılığıyla ya da Postman ile testler yapabilirsiniz. Referans olması için oluşturulmuştur.</p>
+				</div>
+				<div class="col-12 col-xl-2 col-lg-3 col-md-4">
+					<h3>Rotalar</h3>
+					<div class="list-group">
+						<a href="#" data-test="register" class="list-group-item list-group-item-action d-flex align-items-center">
+							Register <small class="opacity-75 fw-semibold ms-auto">user</small>
+						</a>
+						<a href="#" data-test="login" class="list-group-item list-group-item-action d-flex align-items-center">
+							Login <small class="opacity-75 fw-semibold ms-auto">user</small>
+						</a>
+						<a href="#" data-test="products" class="list-group-item list-group-item-action d-flex align-items-center">
+							Products <small class="opacity-75 fw-semibold ms-auto">products</small>
+						</a>
+						<a href="#" data-test="add_to_cart" class="list-group-item list-group-item-action d-flex align-items-center">
+							Add to Cart <small class="opacity-75 fw-semibold ms-auto">order</small>
+						</a>
+						<a href="#" data-test="remove_from_cart" class="list-group-item list-group-item-action d-flex align-items-center">
+							Remove from Cart <small class="opacity-75 fw-semibold ms-auto">order</small>
+						</a>
+						<a href="#" data-test="cart" class="list-group-item list-group-item-action d-flex align-items-center">
+							Cart <small class="opacity-75 fw-semibold ms-auto">order</small>
+						</a>
+						<a href="#" data-test="discounted_cart" class="list-group-item list-group-item-action d-flex align-items-center">
+							Discounted Cart <small class="opacity-75 fw-semibold ms-auto">order</small>
+						</a>
+						<a href="#" data-test="complete_order" class="list-group-item list-group-item-action d-flex align-items-center">
+							Complete Order <small class="opacity-75 fw-semibold ms-auto">order</small>
+						</a>
+						<a href="#" data-test="orders" class="list-group-item list-group-item-action d-flex align-items-center">
+							Orders <small class="opacity-75 fw-semibold ms-auto">order</small>
+						</a>
+						<a href="#" data-test="cancel_order" class="list-group-item list-group-item-action d-flex align-items-center">
+							Cancel Order <small class="opacity-75 fw-semibold ms-auto">order</small>
+						</a>
+					</div>
+					<div class="d-grid mt-4">
+						<a href="/prepare-db" target="_blank" class="btn btn-danger d-flex align-items-center">
+							Prepare DB <small class="opacity-75 fw-semibold ms-auto">app</small>
+						</a>
+					</div>
+				</div>
+				<div class="col-12 col-xl-10 col-lg-9 col-md-8">
+					<div class="row g-1">
+						<div class="col-12 col-xl-6">
+							<h3>İstek <button class="btn btn-primary btn-sm disabled execute-btn">Çalıştır</button></h3>
+							<pre class="code-area request" contenteditable></pre>
+						</div>
+						<div class="col-12 col-xl-6">
+							<h3>Sonuç <span class="btn btn-primary btn-sm opacity-0 result-btn">.</span></h3>
+							<pre class="code-area response"></pre>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
+		<script>
+
+			const listItems = document.querySelectorAll('.list-group-item');
+			const executeBtn = document.querySelector('.execute-btn');
+			const resultBtn = document.querySelector('.result-btn');
+			const requestArea = document.querySelector('.request');
+			const responseArea = document.querySelector('.response');
+
+			(() => {
+
+				[...listItems].map((el) => {
+					el.addEventListener('click', (e) => {
+						listItems.forEach(a => {
+							a.classList.remove('active');
+						});
+						e.target.classList.add('active');
+						window.step = e.target.getAttribute('data-test');
+						prepareSandbox();
+					})
+				});
+
+				executeBtn.addEventListener('click', (e) => {
+					executeSandbox();
+				});
+			})();
+
+			function prepareSandbox() {
+
+				let fetchData = null;
+				requestArea.innerText = '';
+				responseArea.innerText = '';
+
+				if (window.step !== null) {
+					
+					switch (window.step) {
+						case 'register':
+
+							fetchData = {
+								url: "/api/register",
+								method: "POST",
+								headers: {
+									"Accept": "application/json",
+								},
+								body: {
+									name: "Halil İbrahim Erçelik",
+									email: "hiercelik@gmail.com",
+									password: "1234"
+								}
+							};
+
+						break;
+
+						case 'login':
+
+							fetchData = {
+								url: "/api/login",
+								method: "POST",
+								headers: {
+									"Accept": "application/json",
+								},
+								body: {
+									email: "hiercelik@gmail.com",
+									password: "1234"
+								}
+							};
+
+						break;
+
+						case 'products':
+
+							fetchData = {
+								url: "/api/products",
+								method: "POST",
+								headers: {
+									"Accept": "application/json",
+								},
+								body: {}
+							};
+
+						break;
+
+						case 'add_to_cart':
+
+							fetchData = {
+								url: "/api/add-to-cart",
+								method: "POST",
+								headers: {
+									"Accept": "application/json",
+									"X-Token": window.token
+								},
+								body: {
+									productId: 2,
+									quantity: 1
+								}
+							};
+
+						break;
+
+						case 'remove_from_cart':
+
+							fetchData = {
+								url: "/api/remove-from-cart",
+								method: "POST",
+								headers: {
+									"Accept": "application/json",
+									"X-Token": window.token
+								},
+								body: {
+									productId: 2
+								}
+							};
+
+						break;
+
+						case 'cart':
+
+							fetchData = {
+								url: "/api/cart",
+								method: "POST",
+								headers: {
+									"Accept": "application/json",
+									"X-Token": window.token
+								},
+								body: {}
+							};
+
+						break;
+
+						case 'discounted_cart':
+
+							fetchData = {
+								url: "/api/discounted-cart",
+								method: "POST",
+								headers: {
+									"Accept": "application/json",
+									"X-Token": window.token
+								},
+								body: {}
+							};
+
+						break;
+
+						case 'complete_order':
+
+							fetchData = {
+								url: "/api/complete-order",
+								method: "POST",
+								headers: {
+									"Accept": "application/json",
+									"X-Token": window.token
+								},
+								body: {}
+							};
+
+						break;
+
+						case 'orders':
+
+							fetchData = {
+								url: "/api/orders",
+								method: "POST",
+								headers: {
+									"Accept": "application/json",
+									"X-Token": window.token
+								},
+								body: {}
+							};
+
+						break;
+
+						case 'cancel_order':
+
+							fetchData = {
+								url: "/api/cancel-order",
+								method: "POST",
+								headers: {
+									"Accept": "application/json",
+									"X-Token": window.token
+								},
+								body: {
+									orderId: 1
+								}
+							};
+
+						break;
+					}
+				}
+
+				resultBtn.classList.remove('opacity-0');
+				if (fetchData !== null) {
+					
+					executeBtn.classList.remove('disabled');
+					resultBtn.innerText = 'Hazır.';
+					resultBtn.classList.remove('btn-success');
+					resultBtn.classList.remove('btn-danger');
+					resultBtn.classList.add('btn-primary');
+
+					requestArea.innerText = JSON.stringify(fetchData, null, 4);
+				} else {
+
+					executeBtn.classList.add('disabled');
+					resultBtn.innerText = 'Tanımsız Rota.';
+					resultBtn.classList.remove('btn-success');
+					resultBtn.classList.add('btn-danger');
+					resultBtn.classList.remove('btn-primary');
+				}
+			}
+
+			function executeSandbox() {
+
+				let jsonValid = false;
+				window.fetchData = null;
+
+				try {
+
+					const json = JSON.parse(requestArea.innerText);
+
+					if (
+						(json.url === undefined || typeof json.url !== 'string') ||
+						(json.method === undefined || typeof json.method !== 'string') ||
+						(json.headers === undefined || typeof json.headers !== 'object') ||
+						(json.body === undefined || typeof json.body !== 'object')
+					) {
+						throw new Error('JSON');
+					}
+
+					window.fetchData = json;
+
+					resultBtn.innerText = 'İletiliyor...';
+					resultBtn.classList.add('btn-primary');
+					resultBtn.classList.remove('btn-success');
+					resultBtn.classList.remove('btn-danger');
+					jsonValid = true;
+
+				} catch (e) {
+					resultBtn.innerText = 'JSON formatı bozulmuş!';
+					resultBtn.classList.remove('btn-primary');
+					resultBtn.classList.remove('btn-success');
+					resultBtn.classList.add('btn-danger');
+				}
+
+				if (window.fetchData) {
+					new Promise(async () => {
+						const result = await kalipsoFetch(window.fetchData.url, window.fetchData.method, window.fetchData.headers, window.fetchData.body);
+						
+						if (result.status) {
+							resultBtn.innerText = 'Başarılı İşlem';
+							resultBtn.classList.remove('btn-primary');
+							resultBtn.classList.add('btn-success');
+							resultBtn.classList.remove('btn-danger');
+
+							if (result.token !== undefined) {
+								window.token = result.token;
+							}
+
+						} else {
+							resultBtn.innerText = 'Hatalı İşlem';
+							resultBtn.classList.remove('btn-primary');
+							resultBtn.classList.remove('btn-success');
+							resultBtn.classList.add('btn-danger');
+						}
+
+						responseArea.innerText = JSON.stringify(result, null, 4);
+
+					});
+				}
+			}
+
+			async function kalipsoFetch(url = null, method = 'POST', headers = {}, data = {}) {
+
+				url = url ?? window.location.href;
+
+				method = method ?? 'POST';
+				method = method.toUpperCase();
+
+				data = typeof data === 'string' ? JSON.parse(data) : data;
+				data = typeof data === 'object' ? data : {};
+				form = new FormData();
+				for (const [key, value] of Object.entries(data)) {
+					form.append(key, value);
+				}
+				data = form;
+
+				// Fetch
+				return await fetch(url, {
+					method: method,
+					mode: 'cors',
+					cache: 'no-cache',
+					headers: headers,
+					credentials: 'same-origin',
+					referrerPolicy: 'same-origin',
+					redirect: 'follow',
+					body: data
+				})
+				.then((response) => {
+					try {
+						return response.json();
+					} catch (e) {
+						throw new Error(JSON.stringify({
+							status: false,
+							message: 'Server Response Problem! ['+ response.status +']',
+						}));
+					}
+				})
+				.then(data => { return data; })
+				.catch((error) => {
+					if (typeof error.message === 'string') {
+						try {
+							return JSON.parse(error.message);
+						} catch (e) {
+							return {
+								status: false,
+								message: 'Server Response Problem!'
+							};
+						}
+					} else {
+						return error;
+					}
+				});
+			}
+		</script>
+	</body>
+</html>
