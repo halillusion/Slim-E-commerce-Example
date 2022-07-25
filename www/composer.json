@@ -4,7 +4,7 @@
         "slim/psr7": "^1.5",
         "nyholm/psr7": "^1.5",
         "nyholm/psr7-server": "^1.0",
-        "guzzlehttp/psr7": "2",
+        "guzzlehttp/psr7": "2.1.1",
         "laminas/laminas-diactoros": "^2.13",
         "izniburak/pdox": "^1.6",
         "ext-curl": "*",
